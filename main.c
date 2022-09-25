@@ -4,8 +4,8 @@ void num_add()
 {
     static int i = 0;
     int b = 0;
-    i = i + 1;
-    b = b + 1;
+    i++;
+    b++;
     printf("i= %d, b= %d \n", i, b);
 }
 
