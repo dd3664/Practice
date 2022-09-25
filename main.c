@@ -5,7 +5,7 @@ void num_add()
     static int i = 0;
     int b = 0;
     i++;
-    b++;
+    b = b + 1;
     printf("i= %d, b= %d \n", i, b);
 }
 
