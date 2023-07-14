@@ -1,7 +1,7 @@
 # Makefile
 
 # 编译器设置
-CC := gcc
+CC ?= gcc
 CFLAGS := -Wall -std=c11 -I./include
 LDFLAGS := 
 
