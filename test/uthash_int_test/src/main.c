@@ -3,21 +3,21 @@
 #include <string.h>
 #include <uthash.h>
 
-struct my_struct {
+typedef struct {
    int id;
    char name[10];
    UT_hash_handle hh;
-};
+}HASHTEST;
 
-struct my_struct *g_users = NULL;
+HASHTEST *g_users = NULL;
 
 void addUser(int user_id, char *name)
 {
-   struct my_struct *s;
+   HASHTEST *s;
    HASH_FIND_INT(g_users, &user_id, s); /* 插入前先查看key值是否已经在hash表g_users里面了 */
    if (s == NULL)
    {
-      s = (struct my_struct *)malloc(sizeof *s);
+      s = (HASHTEST *)malloc(sizeof *s);
       s->id = user_id;
       HASH_ADD_INT(g_users, id, s); /* 第二个参数为hash结构里面，hash key值的变量名 */
    }
@@ -26,7 +26,7 @@ void addUser(int user_id, char *name)
 
 void deleteUser(int user_id)
 {
-   struct my_struct *s =NULL;
+   HASHTEST *s =NULL;
    HASH_FIND_INT(g_users, &user_id, s);
    if (s != NULL)
    {
@@ -35,17 +35,17 @@ void deleteUser(int user_id)
    }
 }
 
-struct my_struct *findUser(int user_id)
+HASHTEST *findUser(int user_id)
 {
-   struct my_struct *s;
+   HASHTEST *s;
    HASH_FIND_INT(g_users, &user_id, s);
    return s;
 }
 
 void deleteAll()
 {
-   struct my_struct *current_user;
-   struct my_struct *tmp;
+   HASHTEST *current_user;
+   HASHTEST *tmp;
    
    HASH_ITER(hh, g_users, current_user, tmp)
    {
@@ -56,19 +56,19 @@ void deleteAll()
 
 void printUsers()
 {
-   struct my_struct *s;
-   for (s = g_users; s != NULL; s = (struct my_struct *)(s->hh.next))
+   HASHTEST *s;
+   for (s = g_users; s != NULL; s = (HASHTEST *)(s->hh.next))
    {
       printf("userid: %d; name: %s\n", s->id, s->name);
    }
 }
 
-int by_name(const struct my_struct *a, const struct my_struct *b)
+int by_name(const HASHTEST *a, const HASHTEST *b)
 {
    return strcmp(a->name, b->name);
 }
 
-int by_id(const struct my_struct *a, const struct my_struct *b)
+int by_id(const HASHTEST *a, const HASHTEST *b)
 {
    return (a->id - b->id);
 }
@@ -93,7 +93,7 @@ int main()
 {
    int id = 1;
    int running = 1;
-   struct my_struct *s;
+   HASHTEST *s;
    int temp;
 
    while(running)
