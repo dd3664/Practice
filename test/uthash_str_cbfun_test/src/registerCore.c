@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "uthash.h"
-#include "register.h"
+#include "registerCore.h"
 /*--------------------------------------------------------------------------------DEFINES--------------------------------------------------------------------------------*/
 typedef struct __CALLBACK
 {

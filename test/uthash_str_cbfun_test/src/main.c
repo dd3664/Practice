@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "calback.h"
+#include "registerCore.h"
 
 /*--------------------------------------------------------------------------------DEFINES--------------------------------------------------------------------------------*/
 
@@ -17,10 +17,10 @@ int main(int argc, char **argv)
    int ret;
    int a = 3;
    int b = 2;
-   callbackInit();
-   ret = callback("add", a, b);
+   registerInit();
+   ret = actCallback("add", a, b);
    printf("add ret: %d\n", ret);
-   ret = callback("substract", a, b);
+   ret = actCallback("substract", a, b);
    printf("substract ret: %d\n", ret);
    return ret;
 }

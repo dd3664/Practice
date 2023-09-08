@@ -1,34 +1,11 @@
+#ifndef __TESTMODULE_H_
+#define __TESTMODULE_H_
 /*--------------------------------------------------------------------------------INCLUDE--------------------------------------------------------------------------------*/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "uthash.h"
-#include "register.h"
+
 /*--------------------------------------------------------------------------------DEFINES--------------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------------VARIABLES--------------------------------------------------------------------------------*/
 
-/*--------------------------------------------------------------------------------STATIC FUNCTIONS--------------------------------------------------------------------------------*/
-static int add(int a, int b)
-{
-   printf("Entry of func: add\n");
-   return a + b;
-}
-
-static int substract(int a, int b)
-{
-   printf("Entry of func: substract\n");
-   return a - b;
-}
 /*--------------------------------------------------------------------------------PUBLIC FUNCTIONS--------------------------------------------------------------------------------*/
-
-void callbackInit()
-{
-   regCallback("add", add);
-   regCallback("substract", substract);
-}
-
-int callback(char *key, int param1, int param2)
-{
-    return actCallback(key, param1, param2);
-}
+void testModuleInit();
+#endif /* __TESTMODULE_H_ */
