@@ -1,0 +1,1 @@
+利用uthash实现以函数名称为关键字的回调函数注册及调用, 通过__attribute__((constructor))进行静态注册
