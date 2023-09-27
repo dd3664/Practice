@@ -23,24 +23,35 @@ int main()
     SListNode *head1 = NULL;
 	SListNode *head2 = NULL;
 	SListNode *tmp = NULL;
+	//头插
     SListPushFront(&head1, 3);
     SListPushFront(&head1, 2);
     SListPushFront(&head1, 1);
     SListPrint(head1);
-
-	tmp = SListFind(head1, 2);
-	SListInsertAfter(tmp, 4);
+	//反转
+	SListReverse(&head1);
 	SListPrint(head1);
-
+	//排序
+	//SListInsertSort(&head1);
+	SListMergeSort(&head1);
+	SListPrint(head1);
+	//查找
+	tmp = SListFind(head1, 2);
+	//中间插入
+	SListInsertAfter(tmp, 2);
+	SListPrint(head1);
+	//尾插
 	SListPushBack(&head2, 3);
     SListPushBack(&head2, 2);
     SListPushBack(&head2, 1);
 	SListPrint(head2);
-
+	//中间删除
 	tmp = SListFind(head2, 2);
 	SListEraseAfter(tmp);
 	SListPrint(head2);
 
+	SListPrint(tmp);
+	//销毁链表
 	SListDestroy(&head1);
 	SListDestroy(&head2);
 	SListPrint(head1);

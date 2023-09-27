@@ -34,4 +34,7 @@ SListNode *SListFind(SListNode *plist, SLDataType x);
 void SListInsertAfter(SListNode *pos, SLDataType x);
 void SListEraseAfter(SListNode *pos);
 void SListDestroy(SListNode **pplist);
+void SListReverse(SListNode **pplist);
+void SListInsertSort(SListNode **pplist);
+void SListMergeSort(SListNode **pplist);
 #endif /* __SLIST_H_ */
