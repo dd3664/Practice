@@ -32,8 +32,8 @@ int main()
 	SListReverse(&head1);
 	SListPrint(head1);
 	//排序
-	//SListInsertSort(&head1);
-	SListMergeSort(&head1);
+	//SListInsertSort(&head1); //插入排序
+	SListMergeSort(&head1); //归并排序
 	SListPrint(head1);
 	//查找
 	tmp = SListFind(head1, 2);
