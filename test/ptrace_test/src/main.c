@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	int count = 0;
 	struct user_regs_struct regs;
 
-	//示例1：类似
+	//示例1
 	/* child = fork(); //创建一个子进程
 	if (child == 0) //子进程
 	{
