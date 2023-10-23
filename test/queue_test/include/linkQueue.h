@@ -1,7 +1,6 @@
-/*                                            顺序队列                                              */
-#ifndef __SEQ_QUEUE_H_
-#define __SEQ_QUEUE_H_
-
+/*                                        带头节点链式队列                                            */
+#ifndef __LINK_QUEUE_H_
+#define __LINK_QUEUE_H_
 /****************************************************************************************************/
 /*                                           INCLUDE                                                */
 /****************************************************************************************************/
@@ -9,14 +8,20 @@
 /****************************************************************************************************/
 /*                                           DEFINES                                                */
 /****************************************************************************************************/
-#define MAXSIZE (5 + 1) //牺牲一个存储单元来区分队空和队满
 typedef int elemType;
-typedef struct _seqQueue
+typedef struct _linkNode
 {
-    elemType data[MAXSIZE];
-    int front;
-    int rear;
-} seqQueue;
+    elemType data;
+    struct _linkNode *next;
+} linkNode;
+typedef struct _linkQueue
+{
+    linkNode *front; //头指针指向节点
+    linkNode *rear; //尾指针指向节点
+    int length; //队列长度
+    int maxLen; //队列长度上限
+}linkQueue;
+
 /****************************************************************************************************/
 /*                                           VARIABLES                                              */
 /****************************************************************************************************/
@@ -28,11 +33,11 @@ typedef struct _seqQueue
 /****************************************************************************************************/
 /*                                       PUBLIC FUNCTIONS                                           */
 /****************************************************************************************************/
-void initSeqQueue(seqQueue *q);
-bool isSeqQueueEmpty(seqQueue *q);
-bool enSeqQueue(seqQueue *q, elemType x);
-bool deSeqQueue(seqQueue *q, elemType *x);
-bool getSeqQueueHead(seqQueue *q, elemType *x);
-int getSeqQueueNum(seqQueue *q);
+void initLinkQueue(linkQueue *q, int maxLen);
+bool isLinkQueueEmpty(linkQueue *q);
+bool enLinkQueue(linkQueue *q, elemType x);
+bool deLinkQueue(linkQueue *q, elemType *x);
+bool getLinkQueueHead(linkQueue *q, elemType *x);
+int getLinkQueueNum(linkQueue *q);
 
-#endif /* __SEQ_QUEUE_H_ */
+#endif /* __LINK_QUEUE_H_ */
