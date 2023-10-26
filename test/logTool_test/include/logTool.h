@@ -18,28 +18,34 @@
 /*                                           DEFINES                                                */
 /****************************************************************************************************/
 #define TPLOG_PATH                              "/tmp/TPLOG"
-#define MAX_SIXE                                1024 * 5 
-#define MAX_ROTATE                              1
+#define TAR_SUFFIX                              ".tar.gz"
+#define MAX_SIXE                                1024 * 100 
+#define MAX_ROTATE                              2
 #define SUFFIX_LEN                              10
 #define MAX_PATH_LEN                            64
-
+#define MAX_CMD_LEN                             128
 #define ROTATE_FILE(fp) do \
 						{ \
 							int n = 0; \
-							char oldPath[MAX_PATH_LEN] = {0}, newPath[MAX_PATH_LEN] = {0}; \
+							char oldPath[MAX_PATH_LEN] = {0}, newPath[MAX_PATH_LEN] = {0}, tarCmd[MAX_CMD_LEN] = {0}; \
 							size_t base = strlen(TPLOG_PATH); \
+							fclose(fp); \
 							memcpy(oldPath, TPLOG_PATH, base); \
 							memcpy(newPath, TPLOG_PATH, base); \
-							fclose(fp); \
+							sprintf(tarCmd, "tar -czvPf %s%s %s", TPLOG_PATH, TAR_SUFFIX, TPLOG_PATH); \
+							printf("TPT tarCmd:%s\n", tarCmd); \
+							system(tarCmd); \
 							for (n = MAX_ROTATE - 1; n >= 0; n--) \
 							{ \
-								snprintf(oldPath + base, SUFFIX_LEN, n ? ".%d" : "", n - 1); \
-								snprintf(newPath + base, SUFFIX_LEN, ".%d", n); \
+								snprintf(oldPath + base, SUFFIX_LEN, n ? "%s.%d" : "%s",TAR_SUFFIX,  n - 1); \
+								snprintf(newPath + base, SUFFIX_LEN, "%s.%d",TAR_SUFFIX, n); \
+								printf("TPT oldPath:%s, newPath:%s\n", oldPath, newPath); \
 								if (access(newPath, F_OK) == 0) \
 									remove(newPath); \
 								if (access(oldPath, F_OK) == 0) \
 									rename(oldPath, newPath); \
 							} \
+							remove(TPLOG_PATH); \
 							fp = fopen(TPLOG_PATH, "a+"); \
 						} while (0);
 
