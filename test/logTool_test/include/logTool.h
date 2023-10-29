@@ -21,6 +21,8 @@
 #define TAR_SUFFIX                              ".tar.gz"
 #define MAX_SIXE                                1024 * 100 
 #define MAX_ROTATE                              2
+#define LOCK_FILE                               "/tmp/log.lock"
+
 #define SUFFIX_LEN                              10
 #define MAX_PATH_LEN                            64
 #define MAX_CMD_LEN                             128
@@ -59,6 +61,16 @@
 
 #define TPLOG(fmt, ...) do \
 						{ \
+							int lckfd; \
+							struct flock fl; \
+							lckfd = open(LOCK_FILE, O_WRONLY | O_CREAT); \
+							fl.l_type = F_WRLCK; \
+							fl.l_whence = SEEK_END; \
+							fl.l_start = 0; \
+							fl.l_len = 0; \
+							printf("Try get lock.\n"); \
+							fcntl(lckfd, F_SETLKW, &fl); \
+							printf("Got lock.\n"); \
 							FILE *fp = fopen(TPLOG_PATH, "a+"); \
 							size_t file_size = 0; \
 							char timeStr[MAX_TIME_LEN] = {0}; \
@@ -72,7 +84,13 @@
 							} \
 							GET_TIME(timeStr) \
 							fprintf(fp, "[%s] [%s:%s:%d] "fmt"\n",timeStr, __FILE__,  __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+							sleep(10); \
 							fclose(fp); \
+							fl.l_type = F_UNLCK; \
+							printf("UNLOCK\n"); \
+							fcntl(lckfd, F_SETLK, &fl); \
+							close(lckfd); \
+							sleep(1); \
 						} while(0);
 /****************************************************************************************************/
 /*                                           VARIABLES                                              */
