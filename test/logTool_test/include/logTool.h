@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -17,16 +18,38 @@
 /****************************************************************************************************/
 /*                                           DEFINES                                                */
 /****************************************************************************************************/
+#define LOG_DIR                                 "/tmp"
+#define LOG_NAME                                "TPLOG"
 #define TPLOG_PATH                              "/tmp/TPLOG"
 #define TAR_SUFFIX                              ".tar.gz"
-#define MAX_SIXE                                1024 * 100 
-#define MAX_ROTATE                              2
+#define MAX_SIXE                                1024 * 500 
+#define MAX_ROTATE                              3
 #define LOCK_FILE                               "/tmp/log.lock"
 
 #define SUFFIX_LEN                              10
 #define MAX_PATH_LEN                            64
 #define MAX_CMD_LEN                             128
 #define MAX_TIME_LEN                            24
+#define MAX_TRY_GET_LCK                         10
+#define TRY_GET_LCK_INTERVAL                    1000 * 10
+
+#define SYSTEMCMD(cmd) do \
+					   { \
+					  		int pid = 0; \
+							int status = 0; \
+							char *argv[4]; \
+							pid = fork(); \
+							if (pid == 0) \
+							{ \
+								argv[0] = "sh"; \
+								argv[1] = "-c"; \
+								argv[2] = cmd; \
+								argv[3] = 0; \
+								execve("/bin/sh", argv, NULL); \
+								exit(127); \
+							} \
+							waitpid(pid, &status, 0); \
+					   } while(0);
 
 #define GET_TIME(timeStr) do \
 						 { \
@@ -34,6 +57,7 @@
 							struct tm *ptm = localtime(&tt); \
 							strftime(timeStr, MAX_TIME_LEN, "%Y-%m-%d %H:%M:%S", ptm); \
 						 } while (0);
+
 #define TAR_AND_ROTATE_FILE(fp) do \
 								{ \
 									int n = 0; \
@@ -42,9 +66,9 @@
 									fclose(fp); \
 									memcpy(oldPath, TPLOG_PATH, base); \
 									memcpy(newPath, TPLOG_PATH, base); \
-									sprintf(tarCmd, "tar -czvPf %s%s %s", TPLOG_PATH, TAR_SUFFIX, TPLOG_PATH); \
+									sprintf(tarCmd, "cd %s && tar -czvf %s%s %s", LOG_DIR, LOG_NAME, TAR_SUFFIX, LOG_NAME); \
 									printf("TPT tarCmd:%s\n", tarCmd); \
-									system(tarCmd); \
+									SYSTEMCMD(tarCmd) \
 									for (n = MAX_ROTATE - 1; n >= 0; n--) \
 									{ \
 										snprintf(oldPath + base, SUFFIX_LEN, n ? "%s.%d" : "%s",TAR_SUFFIX,  n - 1); \
@@ -62,13 +86,31 @@
 #define TPLOG(fmt, ...) do \
 						{ \
 							int lckfd; \
+							int count = 0; \
 							struct flock fl; \
 							lckfd = open(LOCK_FILE, O_WRONLY | O_CREAT); \
 							fl.l_type = F_WRLCK; \
-							fl.l_whence = SEEK_END; \
+							fl.l_whence = SEEK_SET; \
 							fl.l_start = 0; \
 							fl.l_len = 0; \
 							printf("Try get lock.\n"); \
+							do \
+							{ \
+								if (fcntl(lckfd, F_SETLK, &fl) == -1) \
+								{ \
+									count++; \
+									usleep(TRY_GET_LCK_INTERVAL); \
+									printf("get lck failed\n"); \
+								} \
+								else \
+									break; \
+							} while(count < MAX_TRY_GET_LCK); \
+							if (count == MAX_TRY_GET_LCK) \
+							{ \
+								printf("count == MAX_TRY_GET_LCK\n"); \
+								close(lckfd); \
+								break; \
+							} \
 							fcntl(lckfd, F_SETLKW, &fl); \
 							printf("Got lock.\n"); \
 							FILE *fp = fopen(TPLOG_PATH, "a+"); \
@@ -84,13 +126,11 @@
 							} \
 							GET_TIME(timeStr) \
 							fprintf(fp, "[%s] [%s:%s:%d] "fmt"\n",timeStr, __FILE__,  __FUNCTION__, __LINE__, ##__VA_ARGS__); \
-							sleep(10); \
 							fclose(fp); \
 							fl.l_type = F_UNLCK; \
 							printf("UNLOCK\n"); \
 							fcntl(lckfd, F_SETLK, &fl); \
 							close(lckfd); \
-							sleep(1); \
 						} while(0);
 /****************************************************************************************************/
 /*                                           VARIABLES                                              */
