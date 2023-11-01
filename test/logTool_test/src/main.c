@@ -20,7 +20,7 @@
 /****************************************************************************************************/
 int main(int argc, char *argv[])
 {
-	int n = 2200;
+	int n = 2000000;
 	while (n--)
 	{
 		TPLOG("This is a test This is a test This is a test This is a test This is a test This is a test This is a test\n");

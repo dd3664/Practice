@@ -30,7 +30,7 @@
 #define MAX_PATH_LEN                            64
 #define MAX_CMD_LEN                             128
 #define MAX_TIME_LEN                            24
-#define MAX_TRY_GET_LCK                         10
+#define MAX_TRY_GET_LCK                         100
 #define TRY_GET_LCK_INTERVAL                    1000 * 10
 
 #define SYSTEMCMD(cmd) do \
@@ -103,6 +103,7 @@
 							} while(count < MAX_TRY_GET_LCK); \
 							if (count == MAX_TRY_GET_LCK) \
 							{ \
+								printf("Get lock failed\n"); \
 								close(lckfd); \
 								break; \
 							} \
