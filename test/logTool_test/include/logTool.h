@@ -106,7 +106,6 @@
 								close(lckfd); \
 								break; \
 							} \
-							fcntl(lckfd, F_SETLKW, &fl); \
 							FILE *fp = fopen(TPLOG_PATH, "a+"); \
 							size_t file_size = 0; \
 							char timeStr[MAX_TIME_LEN] = {0}; \
