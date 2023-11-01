@@ -26,7 +26,7 @@
 #define MAX_ROTATE                              3
 #define LOCK_FILE                               "/tmp/log.lock"
 
-#define SUFFIX_LEN                              10
+#define SUFFIX_LEN                              5
 #define MAX_PATH_LEN                            64
 #define MAX_CMD_LEN                             128
 #define MAX_TIME_LEN                            24
@@ -44,7 +44,7 @@
 								argv[0] = "sh"; \
 								argv[1] = "-c"; \
 								argv[2] = cmd; \
-								argv[3] = 0; \
+								argv[3] = NULL; \
 								execve("/bin/sh", argv, NULL); \
 								exit(127); \
 							} \
@@ -62,18 +62,16 @@
 								{ \
 									int n = 0; \
 									char oldPath[MAX_PATH_LEN] = {0}, newPath[MAX_PATH_LEN] = {0}, tarCmd[MAX_CMD_LEN] = {0}; \
-									size_t base = strlen(TPLOG_PATH); \
+									size_t base = strlen(TPLOG_PATH) + strlen(TAR_SUFFIX); \
 									fclose(fp); \
-									memcpy(oldPath, TPLOG_PATH, base); \
-									memcpy(newPath, TPLOG_PATH, base); \
-									sprintf(tarCmd, "cd %s && tar -czvf %s%s %s", LOG_DIR, LOG_NAME, TAR_SUFFIX, LOG_NAME); \
-									printf("TPT tarCmd:%s\n", tarCmd); \
+									snprintf(tarCmd, MAX_CMD_LEN, "cd %s && tar -czvf %s%s %s > /dev/null", LOG_DIR, LOG_NAME, TAR_SUFFIX, LOG_NAME); \
 									SYSTEMCMD(tarCmd) \
+									snprintf(oldPath, base + 1, "%s%s", TPLOG_PATH, TAR_SUFFIX); \
+									snprintf(newPath, base + 1, "%s%s", TPLOG_PATH, TAR_SUFFIX); \
 									for (n = MAX_ROTATE - 1; n >= 0; n--) \
 									{ \
-										snprintf(oldPath + base, SUFFIX_LEN, n ? "%s.%d" : "%s",TAR_SUFFIX,  n - 1); \
-										snprintf(newPath + base, SUFFIX_LEN, "%s.%d",TAR_SUFFIX, n); \
-										printf("TPT oldPath:%s, newPath:%s\n", oldPath, newPath); \
+										snprintf(oldPath + base, SUFFIX_LEN, n ? ".%d" : "", n - 1); \
+										snprintf(newPath + base, SUFFIX_LEN, ".%d", n); \
 										if (access(newPath, F_OK) == 0) \
 											remove(newPath); \
 										if (access(oldPath, F_OK) == 0) \
@@ -93,26 +91,22 @@
 							fl.l_whence = SEEK_SET; \
 							fl.l_start = 0; \
 							fl.l_len = 0; \
-							printf("Try get lock.\n"); \
 							do \
 							{ \
 								if (fcntl(lckfd, F_SETLK, &fl) == -1) \
 								{ \
 									count++; \
 									usleep(TRY_GET_LCK_INTERVAL); \
-									printf("get lck failed\n"); \
 								} \
 								else \
 									break; \
 							} while(count < MAX_TRY_GET_LCK); \
 							if (count == MAX_TRY_GET_LCK) \
 							{ \
-								printf("count == MAX_TRY_GET_LCK\n"); \
 								close(lckfd); \
 								break; \
 							} \
 							fcntl(lckfd, F_SETLKW, &fl); \
-							printf("Got lock.\n"); \
 							FILE *fp = fopen(TPLOG_PATH, "a+"); \
 							size_t file_size = 0; \
 							char timeStr[MAX_TIME_LEN] = {0}; \
@@ -125,10 +119,9 @@
 								TAR_AND_ROTATE_FILE(fp) \
 							} \
 							GET_TIME(timeStr) \
-							fprintf(fp, "[%s] [%s:%s:%d] "fmt"\n",timeStr, __FILE__,  __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+							fprintf(fp, "[%s] [%s:%s:%d] "fmt"",timeStr, __FILE__,  __FUNCTION__, __LINE__, ##__VA_ARGS__); \
 							fclose(fp); \
 							fl.l_type = F_UNLCK; \
-							printf("UNLOCK\n"); \
 							fcntl(lckfd, F_SETLK, &fl); \
 							close(lckfd); \
 						} while(0);

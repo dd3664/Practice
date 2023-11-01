@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
 	int n = 2200;
 	while (n--)
 	{
-		TPLOG("This is a test This is a test This is a test This is a test This is a test This is a test This is a test ");
-		TPLOG("This is a test This is a test This is a test This is a test This is a test This is a test This is a test ");
+		TPLOG("This is a test This is a test This is a test This is a test This is a test This is a test This is a test\n");
+		TPLOG("This is a test This is a test This is a test This is a test This is a test This is a test This is a test\n");
 	}
 	return 0;
 }
