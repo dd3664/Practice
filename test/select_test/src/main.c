@@ -87,6 +87,7 @@ void *my_thread_start(void)
 		{
 			if (FD_ISSET(client_socket, &read_fds))
 			{
+				memset(buffer, 0, sizeof(buffer));
 				size = recv(client_socket, buffer, sizeof(buffer), 0);
 				printf("recv form server buffer=%s\n", buffer);
 			}
@@ -94,7 +95,7 @@ void *my_thread_start(void)
 
 		close(client_socket);
 
-		sleep(5);
+		sleep(1);
 	}
 
 	return NULL;
