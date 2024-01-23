@@ -81,7 +81,7 @@ void *my_thread_start(void)
 		}
 		else if (0 == ret)
 		{
-			printf("select timeout\n");
+			printf("client select timeout\n");
 		}
 		else
 		{
