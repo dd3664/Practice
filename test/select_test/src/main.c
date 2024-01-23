@@ -72,7 +72,7 @@ void *my_thread_start(void)
 
 		FD_ZERO(&read_fds);
 		FD_SET(client_socket, &read_fds);
-		ti.tv_sec = 10;
+		ti.tv_sec = 5;
 		ti.tv_usec = 0;
 		ret = select(MAX_FDS, &read_fds, NULL, NULL, &ti);
 		if (-1 == ret)
@@ -95,7 +95,7 @@ void *my_thread_start(void)
 
 		close(client_socket);
 
-		sleep(1);
+		sleep(6);
 	}
 
 	return NULL;
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 	{
 		FD_ZERO(&read_fds);
 		FD_SET(l_server_socket, &read_fds);
-		ti.tv_sec = 10;
+		ti.tv_sec = 5;
 		ti.tv_usec = 0;
 		ret = select(MAX_FDS, &read_fds, NULL, NULL, &ti);
 		if (-1 == ret)
@@ -178,6 +178,7 @@ int main(int argc, char *argv[])
 		else if (0 == ret)
 		{
 			//超时
+			printf("server select time out\n");
 		}
 		else
 		{
