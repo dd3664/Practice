@@ -17,6 +17,7 @@
 #define MY_THREAD_STACK_SIZE        (8 * 1024 * 1024)
 #define SERVER_PATH                 "/tmp/server_unix_sock"
 #define MAX_FDS                     (32)
+#define MAX_LISTEN_BACKLOG          (5)
 /****************************************************************************************************/
 /*                                           VARIABLES                                              */
 /****************************************************************************************************/
@@ -38,7 +39,7 @@ void handle_interupt(int signum)
 	exit(EXIT_SUCCESS);
 }
 
-void *my_thread_start(void)
+void *client_thread_start(void)
 {
 	int client_socket;
 	struct sockaddr_un server_address;
@@ -101,21 +102,21 @@ void *my_thread_start(void)
 	return NULL;
 }
 
-void init_my_thread(void)
+void init_client_thread(void)
 {
-	pthread_t my_tid;
-	pthread_attr_t my_attr;
+	pthread_t client_tid;
+	pthread_attr_t client_thread_attr;
 
 	pthread_mutex_init(&l_mutex, NULL);
 	pthread_cond_init(&l_condition, NULL);
 
-	pthread_attr_init(&my_attr);
-	pthread_attr_setstacksize(&my_attr, MY_THREAD_STACK_SIZE);
-	pthread_attr_setdetachstate(&my_attr, PTHREAD_CREATE_DETACHED);
+	pthread_attr_init(&client_thread_attr);
+	pthread_attr_setstacksize(&client_thread_attr, MY_THREAD_STACK_SIZE);
+	pthread_attr_setdetachstate(&client_thread_attr, PTHREAD_CREATE_DETACHED);
 
-	pthread_create(&my_tid, &my_attr, (void *)my_thread_start, NULL);
+	pthread_create(&client_tid, &client_thread_attr, (void *)client_thread_start, NULL);
 	
-	pthread_attr_destroy(&my_attr);
+	pthread_attr_destroy(&client_thread_attr);
 
 }
 
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
 	fd_set read_fds;
 	int ret;
 
-	init_my_thread();
+	init_client_thread();
 
 	//创建UNIX域套接字
 	l_server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -155,7 +156,7 @@ int main(int argc, char *argv[])
 	}
 
 	//监听套接字
-	if (-1 == listen(l_server_socket, 5))
+	if (-1 == listen(l_server_socket, MAX_LISTEN_BACKLOG))
 	{
 		perror("listen");
 		goto out;
