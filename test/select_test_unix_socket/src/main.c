@@ -50,6 +50,8 @@ void *client_thread_start(void)
 	char buffer[64] = {0};
 	char message[] = "Message form client\n";
 
+	sleep(1); //等待server初始化完成
+
 	while (1)
 	{
 		//创建客户端套接字
@@ -124,7 +126,7 @@ int main(int argc, char *argv[])
 {
 	struct sockaddr_un server_address;
 	int client_socket;
-	socklen_t client_len;
+	socklen_t client_addr_len;
 	struct sockaddr_un client_address;
 	char buffer[64] = {0};
 	char message[] = "Message form server\n";
@@ -185,7 +187,8 @@ int main(int argc, char *argv[])
 		{
 			if (FD_ISSET(l_server_socket, &read_fds))
 			{
-				client_socket = accept(l_server_socket, (struct sockaddr*)&client_address, &client_len);
+				client_addr_len = sizeof(struct sockaddr);
+				client_socket = accept(l_server_socket, (struct sockaddr*)&client_address, &client_addr_len);
 				if (-1 == client_socket)
 				{
 					perror("accept");
