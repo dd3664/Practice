@@ -1,0 +1,3 @@
+epoll监听tcp socket示例
+将accept返回的socket加入监听列表
+先发送length，在发送data
