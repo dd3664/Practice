@@ -1,0 +1,3 @@
+设置进程/线程的nice
+argv[1]:pid
+argv[2]: nice

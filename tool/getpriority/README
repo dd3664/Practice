@@ -1,0 +1,3 @@
+获取进程/线程的nice
+argv[1]:pid
+ret:进程/线程的nice
