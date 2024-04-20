@@ -22,8 +22,9 @@ int main(int argc, char *argv[])
 {	
 	int id = 0;
 	int a = 0;
-	long double b = 0.000001;
-	int count = 0;
+	int b = 0;
+	long double c = 0.000001;
+	unsigned int print_count = 0;
 
 	if (NULL == argv[1])
 	{
@@ -34,18 +35,19 @@ int main(int argc, char *argv[])
 	printf("============Program %d Start============\n", id);
 	while(1)
 	{
+		c = c * c + 1;
 		a++;
-		b = b * b + 1;
 		if (a == 1000)
 		{
 			//printf("a = %d\n", a);
-			count++;
+			b++;
 			a = 0;
 		}
-		if (count == 10000)
+		if (b == 10000)
 		{
-			printf("id = %d, count = %d\n",id,  count);
-			count = 0;
+			print_count++;
+			printf("id = %d, print_count = %d (x10^7)\n",id,  print_count);
+			b = 0;
 		}
 	}
 	return 0;
