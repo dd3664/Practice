@@ -1,0 +1,2 @@
+移植linux 内核list.h至用户态进程
+编译时需使用-std=gnuXX，例如-std=gnu11
