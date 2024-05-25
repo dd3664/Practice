@@ -119,7 +119,7 @@
 								TAR_AND_ROTATE_FILE(fp) \
 							} \
 							GET_TIME(timeStr) \
-							fprintf(fp, "[%s] [%s:%s:%d] "fmt"",timeStr, __FILE__,  __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+							fprintf(fp, "[%s] [%s:%s:%d] "fmt, timeStr, __FILE__,  __FUNCTION__, __LINE__, ##__VA_ARGS__); \
 							fclose(fp); \
 							fl.l_type = F_UNLCK; \
 							fcntl(lckfd, F_SETLK, &fl); \
