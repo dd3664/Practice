@@ -6,6 +6,7 @@
 /****************************************************************************************************/
 #include <stdbool.h>
 #include "list.h"
+#include "type.h"
 #include "hash.h"
 /****************************************************************************************************/
 /*                                           DEFINES                                                */
@@ -17,7 +18,6 @@
 #define DECLARE_HASHTABLE(name, bits)                                       \
     struct hlist_head name[1 << (bits)]
 
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 #define HASH_SIZE(name) (ARRAY_SIZE(name))
 

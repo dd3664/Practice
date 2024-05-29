@@ -1,2 +1,3 @@
 移植linux 内核hashtable.h至用户态进程
 编译时需使用-std=gnuXX，例如-std=gnu11
+需根据CPU是32位/64位，更改编译宏BITS_PER_LONG
