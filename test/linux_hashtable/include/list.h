@@ -30,9 +30,6 @@
 
 #define INIT_HLIST_HEAD(ptr) ((ptr)->first = NULL)
 
-#define LIST_POISON1  ((void *) 0x00100100)
-#define LIST_POISON2  ((void *) 0x00200200)
-
 
 struct list_head {
     struct list_head *next, *prev;
@@ -135,8 +132,8 @@ static inline void __list_del_entry(struct list_head *entry)
 static inline void list_del(struct list_head *entry)
 {
 	__list_del(entry->prev, entry->next);
-	entry->next = LIST_POISON1;
-	entry->prev = LIST_POISON2;
+	entry->next = NULL;
+	entry->prev = NULL;
 }
 
 /**
@@ -398,8 +395,8 @@ static inline void __hlist_del(struct hlist_node *n)
 static inline void hlist_del(struct hlist_node *n)
 {
     __hlist_del(n);
-    n->next = LIST_POISON1;
-    n->pprev = LIST_POISON2;
+    n->next = NULL;
+    n->pprev = NULL;
 }
 
 static inline void hlist_del_init(struct hlist_node *n)

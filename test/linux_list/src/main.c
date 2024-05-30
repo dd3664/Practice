@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
 	list_for_each_entry_safe(node, tmp, &test_list, list)
 	{
 		printf("ascending sort, Data=%d \n", node->data);
+		list_del(&node->list);
 		free(node);
 	}
 
