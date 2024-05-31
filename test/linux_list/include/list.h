@@ -15,8 +15,10 @@
  * @member:     the name of the member within the struct.
  *
  */
+#ifndef container_of
 #define container_of(ptr, type, member) \
     (type *)((char *)(ptr) - (char *) &((type *)0)->member)
+#endif /* container_of */
 
 #define LIST_HEAD_INIT(name) { &(name), &(name) }
 
