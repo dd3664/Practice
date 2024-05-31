@@ -2,7 +2,7 @@
 
 # 编译器设置
 CC ?= gcc
-CFLAGS := -Wall -std=c11 -I./include
+CFLAGS := -Wall -Werror -std=c11 -I./include
 LDFLAGS := 
 
 # 源文件和目标设置
