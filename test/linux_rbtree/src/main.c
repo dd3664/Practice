@@ -16,7 +16,7 @@ typedef struct _rbtree_entry {
 /****************************************************************************************************/
 /*                                           VARIABLES                                              */
 /****************************************************************************************************/
-struct rb_root entry_root = RB_ROOT;
+struct rb_root g_rbroot = RB_ROOT;
 /****************************************************************************************************/
 /*                                       STATIC FUNCTIONS                                           */
 /****************************************************************************************************/
@@ -76,8 +76,24 @@ static void entry_remove(struct rb_root *root, int key)
 	}
 	rb_erase(&entry->node, root);
 	free(entry);
-	entry = NULL;
 	return;
+}
+
+static void rbtree_destroy(struct rb_root *root)
+{
+	RBTREE_ENTRY *entry = NULL;
+	struct rb_node *cur, *next = NULL;
+
+	cur = rb_first(root);
+	while (cur)
+	{
+		entry = rb_entry(cur, RBTREE_ENTRY, node);
+		next = rb_next(cur);
+		printf("rbtree_destroy, entry->key=%d\n", entry->key);
+		rb_erase(cur, root);
+		free(entry);
+		cur = next;
+	}
 }
 /****************************************************************************************************/
 /*                                       PUBLIC FUNCTIONS                                           */
@@ -88,19 +104,17 @@ int main(int argc, char *argv[])
 	int keys[] = {5, 3, 7, 1, 4, 6, 8};
 	int remove_key = 5;
 	RBTREE_ENTRY *entry = NULL;
-	struct rb_node *cur;
-
 	for (i = 0; i < ARRAY_SIZE(keys); i++)
 	{
 		entry = malloc(sizeof(RBTREE_ENTRY));
 		memset(entry, 0, sizeof(RBTREE_ENTRY));
 		entry->key = keys[i];
-		entry_insert(&entry_root, entry);
+		entry_insert(&g_rbroot, entry);
 	}
 
 	for (i = 0; i < ARRAY_SIZE(keys); i++)
 	{
-		entry = entry_search(&entry_root, keys[i]);
+		entry = entry_search(&g_rbroot, keys[i]);
 		if (NULL == entry)
 		{
 			continue;
@@ -109,16 +123,9 @@ int main(int argc, char *argv[])
 	}
 
 	printf("remove entry which key=%d\n", remove_key);
-	entry_remove(&entry_root, remove_key);
+	entry_remove(&g_rbroot, remove_key);
 
-	for (cur = rb_first(&entry_root); cur; cur = rb_next(cur))
-	{
-		entry = rb_entry(cur, RBTREE_ENTRY, node);
-		printf("remove from root and free, entry->key=%d\n", entry->key);
-		rb_erase(cur, &entry_root);
-		free(entry);
-		entry = NULL;
-	}
+	rbtree_destroy(&g_rbroot);
 
 	return 0;
 }
