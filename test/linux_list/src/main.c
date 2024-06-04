@@ -17,7 +17,7 @@ typedef struct _list_node
 /****************************************************************************************************/
 /*                                           VARIABLES                                              */
 /****************************************************************************************************/
-LIST_HEAD(test_list);
+LIST_HEAD(g_test_list);
 /****************************************************************************************************/
 /*                                       STATIC FUNCTIONS                                           */
 /****************************************************************************************************/
@@ -55,24 +55,24 @@ int main(int argc, char *argv[])
 		memset(node, 0, sizeof(LISTNODE));
 		node->data = test[i];
 		INIT_LIST_HEAD(&node->list);
-		list_add_tail(&node->list, &test_list);
+		list_add_tail(&node->list, &g_test_list);
 	}
 
-	list_for_each_entry(node, &test_list, list)
+	list_for_each_entry(node, &g_test_list, list)
 	{
 		printf("before sort, Data=%d\n", node->data);
 	}
 
-	list_sort(NULL, &test_list, descending_sort);
+	list_sort(NULL, &g_test_list, descending_sort);
 
-	list_for_each_entry(node, &test_list, list)
+	list_for_each_entry(node, &g_test_list, list)
 	{
 		printf("descending sort, Data=%d\n", node->data);
 	}
 
-	list_sort(NULL, &test_list, ascending_sort);
+	list_sort(NULL, &g_test_list, ascending_sort);
 	
-	list_for_each_entry_safe(node, tmp, &test_list, list)
+	list_for_each_entry_safe(node, tmp, &g_test_list, list)
 	{
 		printf("ascending sort, Data=%d \n", node->data);
 		list_del(&node->list);
