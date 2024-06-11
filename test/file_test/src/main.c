@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
 
 
 	fseek(fp, 0L, SEEK_SET);
-	size = fread(buf1, 1, MAX_BUF_LEN, fp);
-	buf1[size - 1] = '\0';
+	size = fread(buf1, 1, MAX_BUF_LEN - 1, fp);
+	buf1[size] = '\0';
 	printf("========fread content========\n");
 	printf("%s", buf1);
 
