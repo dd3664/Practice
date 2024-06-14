@@ -18,7 +18,7 @@ all: $(EXECUTABLE)
 
 # 链接目标文件生成可执行文件
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CC) $^ -o $@ $(LDFLAGS)
 
 # 编译源文件生成目标文件
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
