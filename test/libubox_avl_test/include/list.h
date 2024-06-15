@@ -199,8 +199,7 @@ static inline void list_move_tail(struct list_head *list,
  * @list: the entry to test
  * @head: the head of the list
  */
-static inline int
-list_is_first(const struct list_head *list,
+static inline int list_is_first(const struct list_head *list,
 	      const struct list_head *head)
 {
 	return list->prev == head;
