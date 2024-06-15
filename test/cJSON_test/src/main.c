@@ -148,6 +148,7 @@ static void parse_json()
 			printf("zipcode: %s\n", inner_item->valuestring);
 		}
 	}
+	
 leave:
 	if (root)
 	{
