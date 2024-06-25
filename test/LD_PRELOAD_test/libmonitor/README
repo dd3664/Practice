@@ -1,0 +1,5 @@
+使用LD_PRELOAD拦截代码示例
+说明：
+#define _GNU_SOURCE 是在编写 C 语言程序时使用的一种预处理指令，用于启用 GNU C 库（glibc）中提供的各种非标准扩展。这些扩展通常包括额外的函数、宏和特性，能够增强程序的功能和灵活性
+RTLD_NEXT 则指示系统在查找符号时从当前调用库的下一个库开始, 确保dlsym找到的函数是本库之后定义的函数
+启动进程: LD_PRELOAD=./libmonitor.so ./program

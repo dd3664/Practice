@@ -1,0 +1,4 @@
+使用LD_PRELOAD拦截库函数调用示例
+libmonitor: 拦截函数，需编译为库
+program: 测试进程
+用法：LD_PRELOAD=./libmonitor.so ./program
