@@ -1,0 +1,2 @@
+eloop事件驱动框架使用示例
+使用glibc可能出现timercmp没有定义，需在编译时定义 _GNU_SOURCE
