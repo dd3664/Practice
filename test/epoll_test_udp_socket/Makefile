@@ -3,7 +3,7 @@
 # 编译器设置
 CC ?= gcc
 CFLAGS := -Wall -std=c11 -I./include
-LDFLAGS := -pthread
+LDFLAGS :=
 
 # 源文件和目标设置
 SRCDIR := src
@@ -11,13 +11,16 @@ OBJDIR := obj
 BINDIR := bin
 SOURCES := $(wildcard $(SRCDIR)/*.c)
 OBJECTS := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SOURCES))
-EXECUTABLE := $(BINDIR)/program
+EXECUTABLE := $(BINDIR)/server $(BINDIR)/client
 
 # 默认目标
 all: $(EXECUTABLE)
 
 # 链接目标文件生成可执行文件
-$(EXECUTABLE): $(OBJECTS)
+$(BINDIR)/server: $(OBJDIR)/server.o
+	$(CC) $(LDFLAGS) $^ -o $@
+
+$(BINDIR)/client:  $(OBJDIR)/client.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
 # 编译源文件生成目标文件

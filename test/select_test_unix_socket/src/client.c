@@ -77,9 +77,9 @@ int connect_unix_server(int sockfd, char *srv_path)
 int main(int argc, char *argv[])
 {
 	int client_sock;
+	int ret;
 	struct timeval ti;
 	fd_set read_fds;
-	int ret;
 	size_t size;
 	char buffer[64] = {0};
 	char message[] = "Message form client\n";
@@ -90,8 +90,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     
-    ret = connect_unix_server(client_sock, SERVER_PATH);
-    if (0 > ret)
+    if (0 > connect_unix_server(client_sock, SERVER_PATH))
     {
         exit(-1);
     }
@@ -127,7 +126,7 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				printf("recv form server buffer=%s\n", buffer);
+				printf("recv form server, buffer=%s\n", buffer);
 			}
 		}
 	}

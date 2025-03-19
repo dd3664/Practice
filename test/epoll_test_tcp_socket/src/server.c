@@ -10,11 +10,15 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
+#include <sys/epoll.h>
 /****************************************************************************************************/
 /*                                           DEFINES                                                */
 /****************************************************************************************************/
-#define SERVER_IP		"0.0.0.0"
-#define SERVER_PORT		12345
+#define SERVER_IP                      "127.0.0.1"
+#define SERVER_PORT                    12345
+#define MAX_EVENTS                     (32)
+#define EPOLL_WATI_TIME                (5000) /*ms*/
+#define MAX_LISTEN_BACKLOG             (5)
 /****************************************************************************************************/
 /*                                           VARIABLES                                              */
 /****************************************************************************************************/
@@ -26,13 +30,13 @@
 /****************************************************************************************************/
 /*                                       PUBLIC FUNCTIONS                                           */
 /****************************************************************************************************/
-int init_udp_socket(char *ip, int port)
+int init_tcp_server(char *ip, int port)
 {
-    int sockfd;
+	int sockfd;
     struct sockaddr_in  addr;
 
 	//创建套接字
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (-1 == sockfd)
     {
         perror("socket");
@@ -53,57 +57,118 @@ int init_udp_socket(char *ip, int port)
         return -1;
     }
 
+	//监听套接字
+	if (-1 == listen(sockfd, MAX_LISTEN_BACKLOG))
+	{
+		perror("listen");
+		close(sockfd);
+		return -1;
+	}
+
     return sockfd;
 }
 
 int main(int argc, char *argv[])
 {
 	int server_sock;
+	int client_socket;
 	struct sockaddr_in client_addr;
 	socklen_t client_addr_len;
-	char buffer[64] = {0};
+	char *buffer;
 	char message[] = "Message form server\n";
+	int message_len;
 	size_t size;
-	struct timeval ti;
-	fd_set read_fds;
-	int ret;
+	int epoll_fd;
+	struct epoll_event event, events[MAX_EVENTS];
+	int ready_events;
+	int i;
 
-	server_sock = init_udp_socket(SERVER_IP, SERVER_PORT);
+	server_sock = init_tcp_server(SERVER_IP, SERVER_PORT);
 	if (-1 == server_sock)
 	{
-		exit(-1);
+		goto out;
+	}
+
+	epoll_fd = epoll_create(1);
+	if (-1 == epoll_fd)
+	{
+		perror("failed to create epoll");
+		goto out;
+	}
+
+	event.events = EPOLLIN;
+	event.data.fd = server_sock;
+	if (-1 == epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_sock, &event))
+	{
+		printf("faild to add socket to epoll");
+		goto out;
 	}
 
 	while(1)
 	{
-		FD_ZERO(&read_fds);
-		FD_SET(server_sock, &read_fds);
-		ti.tv_sec = 5;
-		ti.tv_usec = 0;
-		ret = select(server_sock + 1, &read_fds, NULL, NULL, &ti);
-		if (-1 == ret)
+		ready_events = epoll_wait(epoll_fd, events, MAX_EVENTS, EPOLL_WATI_TIME);
+		if (-1 == ready_events)
 		{
-			perror("select");
+			perror("epoll");
 			continue;
 		}
-		else if (0 == ret)
+		else if (0 == ready_events)
 		{
-			/* select timeout */
+			/* epoll timeout */
 			continue;
 		}
 		else
 		{
-			if (FD_ISSET(server_sock, &read_fds))
+			for (i = 0; i < ready_events; ++i)
 			{
-				memset(&client_addr, 0, sizeof(struct sockaddr_in));
-				client_addr_len = sizeof(client_addr);
-				size = recvfrom(server_sock, buffer, sizeof(buffer), 0, (struct sockaddr *)&client_addr, &client_addr_len);
-				printf("recv from client, buffer=%s\n", buffer);
-				size = sendto(server_sock, message, strlen(message), 0, (struct sockaddr *)&client_addr, client_addr_len);
+				if (events[i].data.fd == server_sock)
+				{
+					memset(&client_addr, 0, sizeof(struct sockaddr_in));
+					client_addr_len = sizeof(struct sockaddr);
+					client_socket = accept(server_sock, (struct sockaddr *)&client_addr, &client_addr_len);
+					if (-1 == client_socket)
+					{
+						perror("accept");
+					}
+					else
+					{
+						event.events = EPOLLIN;
+						event.data.fd = client_socket;
+						if (-1 == epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket, &event))
+						{
+							perror("faild to add socket to epoll");
+						}
+					}
+				}
+				else
+				{
+					client_socket = events[i].data.fd;
+					size = recv(client_socket, &message_len, sizeof(message_len), 0);
+					if (0 == size)
+					{
+						/* client socket has been closed */
+						epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_socket, &event);
+						close(client_socket);
+						continue;
+					}
+					buffer = malloc(message_len + 1);
+					memset(buffer, 0, message_len + 1);
+					size = recv(client_socket, buffer, message_len, 0);
+					printf("recv from client, buffer=%s\n", buffer);
+					free(buffer);
+
+					message_len = strlen(message);
+					size = send(client_socket, &message_len, sizeof(message_len), 0);
+					size = send(client_socket, message, strlen(message), 0);
+				}
 			}
 		}
 	}
 
-	close(server_sock);
+out:
+	if (server_sock >= 0)
+	{
+		close(server_sock);
+	}
 	return 0;
 }

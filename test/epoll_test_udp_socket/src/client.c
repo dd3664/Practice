@@ -10,11 +10,14 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
+#include <sys/epoll.h>
 /****************************************************************************************************/
 /*                                           DEFINES                                                */
 /****************************************************************************************************/
-#define SERVER_IP		"127.0.0.1"
-#define SERVER_PORT		12345
+#define SERVER_IP                      "127.0.0.1"
+#define SERVER_PORT                    12345
+#define MAX_EVENTS                     (32)
+#define EPOLL_WATI_TIME                (5000) /*ms*/
 /****************************************************************************************************/
 /*                                           VARIABLES                                              */
 /****************************************************************************************************/
@@ -60,14 +63,35 @@ int main(int argc, char *argv[])
 {
 	int client_sock;
 	struct sockaddr_in server_addr;
-	struct timeval ti;
-	fd_set read_fds;
-	int ret;
 	size_t size;
-	char buffer[64] = {0};
+	char *buffer;
 	char message[] = "Message form client\n";
+	int message_len;
+	int epoll_fd;
+	struct epoll_event event, events[MAX_EVENTS];
+	int ready_events;
+	int i;
 
 	client_sock = init_udp_socket(NULL, 0);
+	if (-1 == client_sock)
+	{
+		exit(-1);
+	}
+
+	epoll_fd = epoll_create(1);
+	if (-1 == epoll_fd)
+	{
+		perror("failed to create epoll");
+		goto out;
+	}
+
+	event.events = EPOLLIN;
+	event.data.fd = client_sock;
+	if (-1 == epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_sock, &event))
+	{
+		printf("faild to add socket to epoll");
+		goto out;
+	}
 
 	//设置服务器地址
 	memset(&server_addr, 0, sizeof(struct sockaddr_in));
@@ -75,32 +99,41 @@ int main(int argc, char *argv[])
 	server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
 	server_addr.sin_port = htons(SERVER_PORT);
 
+	message_len = strlen(message);
+	size = sendto(client_sock, &message_len, sizeof(message_len), 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
 	size = sendto(client_sock, message, strlen(message), 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
-
-	FD_ZERO(&read_fds);
-	FD_SET(client_sock, &read_fds);
-	ti.tv_sec = 5;
-	ti.tv_usec = 0;
-	ret = select(client_sock + 1, &read_fds, NULL, NULL, &ti);
-	if (-1 == ret)
+	
+	ready_events = epoll_wait(epoll_fd, events, MAX_EVENTS, EPOLL_WATI_TIME);
+	if (-1 == ready_events)
 	{
-		perror("select");
+		perror("epoll");
 	}
-	else if (0 == ret)
+	else if (0 == ready_events)
 	{
-		/* select timeout */
+		/* epoll timeout */
 	}
 	else
 	{
-		if (FD_ISSET(client_sock, &read_fds))
+		for (i = 0; i < ready_events; ++i)
 		{
-			memset(buffer, 0, sizeof(buffer));
-			size = recv(client_sock, buffer, sizeof(buffer), 0);
-			printf("recv form server, buffer=%s\n", buffer);
+			if (events[i].data.fd == client_sock)
+			{
+				size = recv(client_sock, &message_len, sizeof(message_len), 0);
+				buffer = malloc(message_len + 1);
+				memset(buffer, 0, message_len + 1);
+				size = recv(client_sock, buffer, message_len, 0);
+				printf("recv form server, buffer=%s\n", buffer);
+				free(buffer);
+			}
 		}
 	}
 
-	close(client_sock);
+
+out:
+	if (client_sock >= 0)
+	{
+		close(client_sock);
+	}
 
 	return 0;
 }

@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 					}
 					else
 					{
-						printf("recv form client buffer=%s\n", buffer);
+						printf("recv form client, buffer=%s\n", buffer);
 						size = send(client_socks[i], message, strlen(message), 0);
 					}
 				}
